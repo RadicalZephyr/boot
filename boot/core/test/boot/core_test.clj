@@ -28,4 +28,23 @@
       (is (= [:foo :bar] (test-task)))
 
       (task-options! test-task #(assoc % :baz 1))
-      (is (= [:foo :bar :foo :bar :baz 1] (test-task))))))
+      (is (= [:foo :bar :foo :bar :baz 1] (test-task)))))
+
+  (testing "update options with a function"
+    (with-redefs [test-task (fn [& xs] xs)]
+      (task-options! test-task {:foo (delay 1)})
+      (is (= [:foo 1] (test-task)))))
+
+  (testing "update options with a function"
+    (with-redefs [test-task (fn [& xs] xs)]
+      (task-options! test-task (delay {:foo 1}))
+      (is (= [:foo 1] (test-task)))))
+
+  (testing "update options with a function"
+    (with-redefs [test-task (fn [& xs] xs)]
+      (task-options! test-task {:foo (delay 1)})
+      (is (= [:foo 1] (test-task)))
+
+      (task-options! test-task #(update % :foo inc))
+      (is (= [:foo 2] (test-task)))
+      )))
