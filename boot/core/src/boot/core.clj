@@ -1152,9 +1152,12 @@
            `(let [opt# ~opts
                   var# (var ~task)
                   old# (:task-options (meta var#))
-                  new# (if (map? opt#) opt# (opt# old#))
-                  arg# (mapcat identity new#)]
-              (replace-task! [t# ~task] (fn [& xs#] (apply t# (concat arg# xs#))))
+                  new# (if (map? opt#) opt# (delay-if-fail (opt# old#)))]
+              (replace-task! [t# ~task]
+                             (fn [& xs#]
+                               (let [arg# (mapcat identity (force new#))]
+                                 (apply t# (concat (map force arg#)
+                                                   xs#)))))
               (alter-meta! var# (fn [x#] (assoc x# :task-options new#)))))
        nil))
 
